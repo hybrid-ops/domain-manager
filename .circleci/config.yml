@@ -1,0 +1,119 @@
+#### CircleCI configuration file to support gitops workflow
+# To successfully complete these runs
+# some variables need to be defined in the CircleCI environment
+#
+# BACKEND_BUCKET - The S3 bucket to use for the terraform state backend
+# BACKEND_KEY    - The path to use for the terraform state backend
+# ARM_CLIENT_ID  - Service Principal for deploying resources
+# ARM_TENANT_ID  - TenantID to provision resources in
+# ARM_CLIENT_SECRET   - Secret for the Service Principal
+# ARM_SUBSCRIPTION_ID - Subscriptinon to provision resources in
+# AWS_ACCESS_KEY_ID
+# AWS_SECRET_ACCESS_KEY
+# AWS_REGION
+version: 2.1
+executors:
+  terraform:
+    docker:
+      - image: hashicorp/terraform:0.12.18
+commands:
+  # CircleCI generally only triggers builds on commits to the main repository,
+  # so PRs coming from branches of the main repo simply reference builds for existing commits
+  # (CIRCLE_BRANCH=branchname and CIRCLE_PR_NUMBER is unset);
+  # The only time PRs will trigger a build is when the PR is referencing a fork
+  # (CIRCLE_BRANCH=pull/XXX and CIRCLE_PR_NUMBER=XXX).
+  early_return_for_forked_pull_requests:
+    description: >-
+      If this build is from a fork, stop executing the current job and return success.
+      This is useful to avoid steps that will fail due to missing credentials.
+    steps:
+      - run:
+          name: Early return if this build is from a forked PR
+          command: |
+            if [ -n "$CIRCLE_PR_NUMBER" ]; then
+
+              echo "We won't build from PRs. Exiting"
+              circleci step halt
+            fi
+  tf_init:
+    description: Initialize terraform and perform necessary modifications
+    steps:
+      - run:
+          name: make backend override file
+          command: |
+            cat \<<EOF > backend_override.tf
+            
+            terraform {
+              backend "s3" {
+                bucket = "${BACKEND_BUCKET}"
+                key    = "${BACKEND_KEY}"
+                region = "${AWS_REGION}"
+              }
+            }
+            EOF
+      - run: terraform init
+  make_backend:
+    description: Create backend override file
+    steps:
+      - run: 
+
+jobs:
+  plan:
+    executor: terraform
+    steps:
+      - checkout
+      - run:
+          name: terraform syntax validation
+          command: terraform validate -check-variables=false
+      - early_return_for_forked_pull_requests
+      - tf_init
+      - run:
+          name: terraform plan
+          command: |
+            set +eo pipefail
+            terraform plan -detailed-exitcode -out=mybuild
+            retval=$?
+            if [[ $retval -eq 0 ]]; then
+              echo "Terraform found no configuration difference. Exiting"
+              circleci step halt
+            elif [[ $retval -eq 1 ]]; then
+              echo "There was an error with the configuration. Exiting"
+              exit 1
+            elif [[ $retval -eq 2 ]]; then
+              echo "Terraform found changes. Send for approval."
+            else
+              echo "Unknown exit code $retval"
+              exit $retval
+            fi
+      - persist_to_workspace:
+          root: .
+          paths:
+            - mybuild
+
+  build:
+    executor: terraform
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp/workspace
+      - tf_init
+      - run:
+          name: terraform apply
+          command: terraform apply "/tmp/workspace/mybuild" -no-color
+orbs:
+  slack: circleci/slack@3.4.1
+
+workflows:
+  workflow:
+    jobs:
+      - plan
+      - slack/approval-notification:
+          requires:
+            - plan
+      - hold:
+          type: approval
+          requires:
+            - plan
+      - build:
+          requires:
+            - hold
