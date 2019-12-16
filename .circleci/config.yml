@@ -86,12 +86,13 @@ jobs:
               exit 1
             elif [[ $retval -eq 2 ]]; then
               echo "Terraform found changes. Notify and send for approval."
+              echo "export tfdiff='$(terraform show mybuild)'" >> $BASH_ENV
             else
               echo "Unknown exit code $retval"
               exit $retval
             fi
       - slack/notify:
-          message: "Terraform diff: \n $(terraform show mybuild -no-color)"
+          message: "Terraform diff: \n $tfdiff "
           author_name: "TerraformDiffer"
           title: "Terraform diff for approval"
       - persist_to_workspace:
