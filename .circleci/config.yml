@@ -93,7 +93,7 @@ jobs:
               exit $retval
             fi
       - slack/notify:
-          message: "Terraform diff: \n $tfdiff "
+          message: "\`\`\` $tfdiff \`\`\`"
           author_name: "TerraDiffer"
           title: "Terraform diff for approval"
       - persist_to_workspace:
