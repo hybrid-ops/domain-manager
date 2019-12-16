@@ -94,7 +94,7 @@ jobs:
             fi
       - slack/notify:
           message: "Terraform diff: \n $tfdiff "
-          author_name: "TerraformDiffer"
+          author_name: "TerraDiffer"
           title: "Terraform diff for approval"
       - persist_to_workspace:
           root: .
