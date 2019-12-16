@@ -26,12 +26,12 @@ module "azurezonens" {
 
 module "awsbase" {
   source        = "./aws_zone"
-  name          = "aws.${var.basedomain}"
+  name          = "aw.${var.basedomain}"
 }
 
 module "awsbasens" {
   source       = "./aws_zone_ns"
-  name         = "aws.${var.basedomain}"
+  name         = "aw.${var.basedomain}"
   root_zone_id = module.rootzone.zone_id
   name_servers = module.awsbase.name_servers  
 }
