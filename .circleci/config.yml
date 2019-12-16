@@ -11,11 +11,14 @@
 # AWS_ACCESS_KEY_ID
 # AWS_SECRET_ACCESS_KEY
 # AWS_REGION
+# SLACK_WEBHOOK
 version: 2.1
 executors:
   terraform:
     docker:
       - image: hashicorp/terraform:0.12.18
+    environment:
+      TF_VAR_basedomain: domstage.multicloudops.io
 commands:
   # CircleCI generally only triggers builds on commits to the main repository,
   # so PRs coming from branches of the main repo simply reference builds for existing commits
@@ -52,11 +55,12 @@ commands:
             }
             EOF
       - run: terraform init
-  make_backend:
-    description: Create backend override file
+  slack_prereqs:
+    description: Install slack orb prereqs
     steps:
-      - run: 
-
+      - run:
+          name: install slack-orb prereqs
+          command: apk update && apk install bash curl
 jobs:
   plan:
     executor: terraform
@@ -66,6 +70,7 @@ jobs:
           name: terraform syntax validation
           command: terraform validate -check-variables=false
       - early_return_for_forked_pull_requests
+      - slack_prereqs
       - tf_init
       - run:
           name: terraform plan
@@ -96,18 +101,22 @@ jobs:
       - checkout
       - attach_workspace:
           at: /tmp/workspace
+      - slack_prereqs
       - tf_init
       - run:
           name: terraform apply
           command: terraform apply "/tmp/workspace/mybuild" -no-color
+      - slack/status
+    
 orbs:
   slack: circleci/slack@3.4.1
 
 workflows:
-  workflow:
+  domain-management:
     jobs:
       - plan
       - slack/approval-notification:
+          message: "DNS modification by $CIRCLE_USERNAME is pending approval"
           requires:
             - plan
       - hold:
