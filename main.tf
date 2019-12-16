@@ -12,16 +12,16 @@ module "rootzone" {
   basedomain = var.basedomain
 }
 
-module "azurezone" {
+module "azurebase" {
   source       = "./azure_zone"
   name         = "az.${var.basedomain}"
 }
 
-module "azurezonens" {
+module "azurebasens" {
   source       = "./aws_zone_ns"
   name         = "az.${var.basedomain}"
   root_zone_id = module.rootzone.zone_id
-  name_servers = module.azurezone.name_servers
+  name_servers = module.azurebase.name_servers
 }
 
 module "awsbase" {
@@ -39,6 +39,6 @@ module "awsbasens" {
 output "available_zones" {
   value = [
     module.awsbasens.fqdn,
-    module.azurezonens.fqdn
+    module.azurebasens.fqdn
   ]
 }
