@@ -66,12 +66,12 @@ jobs:
     executor: terraform
     steps:
       - checkout
-      - run:
-          name: terraform syntax validation
-          command: terraform validate -check-variables=false
       - early_return_for_forked_pull_requests
       - slack_prereqs
       - tf_init
+      - run:
+          name: terraform syntax validation
+          command: terraform validate -check-variables=false
       - run:
           name: terraform plan
           command: |
