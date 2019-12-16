@@ -11,9 +11,9 @@ output "AWS_SECRET_ACCESS_KEY" {
 }
 
 output "STATE_S3_BUCKET" {
-  value = aws_s3_bucket.domain_manager.bucket_domain_name
+  value = aws_s3_bucket.domain_manager.bucket
 }
 
 output "STATE_PATH" {
-  value = "var.statefile_path"
+  value = var.statefile_path
 }
