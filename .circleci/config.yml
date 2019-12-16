@@ -60,7 +60,7 @@ commands:
     steps:
       - run:
           name: install slack-orb prereqs
-          command: apk update && apk install bash curl
+          command: apk update && apk add bash curl
 jobs:
   plan:
     executor: terraform
@@ -71,7 +71,7 @@ jobs:
       - tf_init
       - run:
           name: terraform syntax validation
-          command: terraform validate -check-variables=false
+          command: terraform validate
       - run:
           name: terraform plan
           command: |
