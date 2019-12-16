@@ -24,10 +24,10 @@ resource "azuread_service_principal_password" "domain_manager" {
   end_date_relative    = "2400h"
 }
 
-output "service_principal_password" {
-  value = "export ARM_CLIENT_SECRET=\"${random_password.service_principal.result}\""
+output "ARM_CLIENT_SECRET" {
+  value = random_password.service_principal.result
 }
 
-output "principal_id" {
-  value = "export ARM_CLIENT_ID=\"${azuread_service_principal.domain_manager.application_id}\""
+output "ARM_CLIENT_ID" {
+  value = azuread_service_principal.domain_manager.application_id
 }
