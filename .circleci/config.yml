@@ -85,11 +85,15 @@ jobs:
               echo "There was an error with the configuration. Exiting"
               exit 1
             elif [[ $retval -eq 2 ]]; then
-              echo "Terraform found changes. Send for approval."
+              echo "Terraform found changes. Notify and send for approval."
             else
               echo "Unknown exit code $retval"
               exit $retval
             fi
+      - slack/notify:
+          message: "Terraform diff: \n $(terraform show mybuild -no-color)"
+          author_name: "TerraformDiffer"
+          title: "Terraform diff for approval"
       - persist_to_workspace:
           root: .
           paths:
@@ -106,7 +110,9 @@ jobs:
       - run:
           name: terraform apply
           command: terraform apply "/tmp/workspace/mybuild" -no-color
-      - slack/status
+      - slack/status:
+          success_message: "Successfully updated domain configuration"
+          failure_message: "Failed to update domain configuration"
     
 orbs:
   slack: circleci/slack@3.4.1
