@@ -22,6 +22,7 @@ resource "aws_s3_bucket" "domain_manager" {
 # https://www.terraform.io/docs/providers/aws/r/s3_bucket_policy.html
 # Give the domain manager access to the bucket
 resource "aws_s3_bucket_policy" "domain_manager_s3_policy" {
+  depends_on = [ aws_s3_bucket.domain_manager ]
   bucket = aws_s3_bucket.domain_manager.id
 
   policy = <<POLICY
@@ -42,10 +43,10 @@ resource "aws_s3_bucket_policy" "domain_manager_s3_policy" {
        }
      },
      {
-       "Sid": "domain_manager-put-statefile"
+       "Sid": "domain_manager-put-statefile",
        "Effect": "Allow",
        "Action": ["s3:GetObject", "s3:PutObject"],
-       "Resource": "${aws_s3_bucket.domain_manager.arn}/${var.statefile_path}"
+       "Resource": ["${aws_s3_bucket.domain_manager.arn}/${var.statefile_path}"],
        "Principal": {
          "AWS": [
            "${aws_iam_user.domain_manager.arn}"
