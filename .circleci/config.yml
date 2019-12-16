@@ -96,6 +96,9 @@ jobs:
           message: "$tfdiff"
           author_name: "TerraDiffer"
           title: "Terraform diff for approval"
+          include_project_field: false
+          include_job_number_field: false
+          include_visit_job_action: false
       - persist_to_workspace:
           root: .
           paths:
@@ -112,6 +115,19 @@ jobs:
       - run:
           name: terraform apply
           command: terraform apply "/tmp/workspace/mybuild" -no-color
+      - run:
+          name: report current managed domains
+          command: |
+            set +eo pipefail
+            m=$(terraform output available_zones)
+            echo "export managed_zones=\"$(echo "$m" | sed "s/\"//g")\"" >> $BASH_ENV
+      - slack/notify:
+          title: "Zones currently under management"
+          message: "$managed_zones"
+          include_project_field: false
+          include_job_number_field: false
+          include_visit_job_action: false
+            
       - slack/status:
           success_message: "Successfully updated domain configuration"
           failure_message: "Failed to update domain configuration"
