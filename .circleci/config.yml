@@ -86,7 +86,8 @@ jobs:
               exit 1
             elif [[ $retval -eq 2 ]]; then
               echo "Terraform found changes. Notify and send for approval."
-              echo "export tfdiff='$(terraform show mybuild)'" >> $BASH_ENV
+              m=$(terraform show -no-color mybuild)
+              echo "export tfdiff=\"$(echo "$m" | sed "s/\"/'/g")\"" >> $BASH_ENV
             else
               echo "Unknown exit code $retval"
               exit $retval
