@@ -18,7 +18,7 @@ executors:
     docker:
       - image: hashicorp/terraform:0.12.18
     environment:
-      TF_VAR_basedomain: domstage.multicloudops.io
+      TF_VAR_basedomain: multicloudops.io
 commands:
   # CircleCI generally only triggers builds on commits to the main repository,
   # so PRs coming from branches of the main repo simply reference builds for existing commits
