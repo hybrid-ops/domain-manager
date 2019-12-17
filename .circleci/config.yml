@@ -99,11 +99,14 @@ jobs:
           include_project_field: false
           include_job_number_field: false
           include_visit_job_action: false
+      - slack/approval:
+          message: "DNS modification by $CIRCLE_USERNAME is pending approval"
+          include_project_field: false
+          include_job_number_field: false
       - persist_to_workspace:
           root: .
           paths:
             - mybuild
-
   build:
     executor: terraform
     steps:
@@ -116,9 +119,9 @@ jobs:
           name: terraform apply
           command: |
             if [[ -f /tmp/workspace/mybuild ]]; then
-              terraform apply "/tmp/workspace/mybuild" -no-color
+              terraform apply "/tmp/workspace/mybuild"
             else
-              # There was no change
+              echo "Seemingly there was no change to apply"
               circleci step halt
             fi
       - run:
@@ -133,7 +136,6 @@ jobs:
           include_project_field: false
           include_job_number_field: false
           include_visit_job_action: false
-            
       - slack/status:
           success_message: "Successfully updated domain configuration"
           failure_message: "Failed to update domain configuration"
@@ -145,10 +147,6 @@ workflows:
   domain-management:
     jobs:
       - plan
-      - slack/approval-notification:
-          message: "DNS modification by $CIRCLE_USERNAME is pending approval"
-          requires:
-            - plan
       - hold:
           type: approval
           requires:
