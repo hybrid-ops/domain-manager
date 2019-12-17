@@ -10,6 +10,7 @@ variable "location" {
 resource "azurerm_resource_group" "domain_manager" {
   name      = var.resource_group
   location  = var.location
+  tags      = var.default_tags
 }
 
 

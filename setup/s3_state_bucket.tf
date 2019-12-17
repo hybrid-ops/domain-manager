@@ -13,10 +13,10 @@ resource "aws_s3_bucket" "domain_manager" {
     enabled = true
   }
 
-  tags = {
+  tags = merge(var.default_tags, {
     Name        = "SRE Domain Manager State"
     Environment = "Production"
-  }
+  })
 }
 
 # https://www.terraform.io/docs/providers/aws/r/s3_bucket_policy.html

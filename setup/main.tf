@@ -1,5 +1,10 @@
-provider "aws" { }
+variable "default_tags" {
+  description = "Default tags to apply to all resources that support tagging"
+  type        = map
+  default     = {}
+}
 
+provider "aws" { }
 
 # Output the details
 output "AWS_ACCESS_KEY_ID" {
