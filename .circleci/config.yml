@@ -114,7 +114,13 @@ jobs:
       - tf_init
       - run:
           name: terraform apply
-          command: terraform apply "/tmp/workspace/mybuild" -no-color
+          command: |
+            if [[ -f /tmp/workspace/mybuild ]]; then
+              terraform apply "/tmp/workspace/mybuild" -no-color
+            else
+              # There was no change
+              circleci step halt
+            fi
       - run:
           name: report current managed domains
           command: |
