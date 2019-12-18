@@ -14,5 +14,5 @@ output "name_servers" {
 }
 
 output "zone_id" {
-  value = azurerm_dns_zone.z.id
+  value = azurerm_dns_zone.z.name
 }
