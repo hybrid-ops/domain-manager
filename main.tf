@@ -41,14 +41,16 @@ module "awsbasens" {
 ## AWS Dev environment zone
 module "awsdev" {
   source        = "./aws_subzone"
-  name          = "dev.${module.awsbasens.fqdn}"
+  name          = "dev"
+  parent_fqdn   = module.awsbasens.fqdn
   parent_zone   = module.awsbase.zone_id
 }
 
 ## Azure Dev environment zone
 module "azdev" {
   source        = "./azure_subzone"
-  name          = "dev.${module.azurebasens.fqdn}"
+  name          = "dev"
+  parent_fqdn   = module.azurebasens.fqdn
   parent_zone   = module.azurebase.zone_id
 }
 

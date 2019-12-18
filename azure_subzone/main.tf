@@ -6,6 +6,11 @@ variable "resource_group" {
 
 variable "parent_zone" { }
 
+variable "parent_fqdn" { 
+  default     = ""
+  description = "For no noop in Azure"
+}
+
 variable "tags" {
   type    = map
   default = { }
