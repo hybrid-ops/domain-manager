@@ -38,10 +38,27 @@ module "awsbasens" {
   name_servers = module.awsbase.name_servers  
 }
 
+## AWS Dev environment zone
+module "awsdev" {
+  source        = "./aws_subzone"
+  name          = "dev.${module.awsbasens.fqdn}"
+  parent_zone   = module.awsbase.zone_id
+}
+
+## Azure Dev environment zone
+module "azdev" {
+  source        = "./azure_subzone"
+  name          = "dev.${module.azurebasens.fqdn}"
+  parent_zone   = module.azurebase.zone_id
+}
+
 ## Outputs
 output "available_zones" {
   value = [
     module.awsbasens.fqdn,
-    module.azurebasens.fqdn
+    module.awsdev.fqdn,
+    module.azurebasens.fqdn,
+    module.azdev.fqdn
+    
   ]
 }
