@@ -139,6 +139,9 @@ jobs:
       - slack/status:
           success_message: "Successfully updated domain configuration"
           failure_message: "Failed to update domain configuration"
+          include_project_field: false
+          include_job_number_field: false
+          include_visit_job_action: false
     
 orbs:
   slack: circleci/slack@3.4.1
