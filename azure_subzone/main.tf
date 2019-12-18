@@ -6,10 +6,7 @@ variable "resource_group" {
 
 variable "parent_zone" { }
 
-variable "parent_fqdn" { 
-  default     = ""
-  description = "For no noop in Azure"
-}
+variable "parent_fqdn" { }
 
 variable "tags" {
   type    = map
@@ -17,7 +14,7 @@ variable "tags" {
 }
 
 resource "azurerm_dns_zone" "z" {
-  name                = var.name
+  name                = "${var.name}.${var.parent_fqdn}"
   resource_group_name = var.resource_group
   tags                = var.tags
 }
